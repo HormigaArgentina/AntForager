@@ -2,3 +2,7 @@ venv/
 __pycache__/
 *.pyc
 .DS_Store
+error-*.log
+salida.log
+clip_test.mp4
+data/

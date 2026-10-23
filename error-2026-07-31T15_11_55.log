@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/hormiga_entrerriana/Documents/AntForager/run_gui.py", line 2, in <module>
-    main()
-  File "/Users/hormiga_entrerriana/Documents/AntForager/ant_tracker/tracker_gui/main_window.py", line 78, in main
-    det = leafdetect.TFLiteLeafDetector(C.TFLITE_MODEL, [])
-  File "/Users/hormiga_entrerriana/Documents/AntForager/ant_tracker/tracker/leafdetect.py", line 94, in __init__
-    import tflite_runtime.interpreter as tflite
-ModuleNotFoundError: No module named 'tflite_runtime'
