@@ -15,10 +15,12 @@ from ..tracker.segmenter import LogWSegmenter
 
 class MyGraph(sg.Graph):
     def __init__(self, imshape, *args, **kwargs):
-        import screeninfo
-
-        screen_height = min([monitor.height for monitor in screeninfo.get_monitors()])
-        screen_width = min([monitor.width for monitor in screeninfo.get_monitors()])
+        import tkinter as tk
+        _tmproot = tk.Tk()
+        _tmproot.withdraw()
+        screen_height = _tmproot.winfo_screenheight()
+        screen_width = _tmproot.winfo_screenwidth()
+        _tmproot.destroy()
         video_height = imshape[0]
         video_width = imshape[1]
 
@@ -37,6 +39,9 @@ class MyGraph(sg.Graph):
 
         self.default_line_width = np.ceil(1 / self.video_scale)
         graph_shape = int(video_width * self.video_scale), int(video_height * self.video_scale)
+        print(f"DEBUG screen_width={screen_width} screen_height={screen_height} "
+              f"video_width={video_width} video_height={video_height} "
+              f"scale={self.video_scale} graph_shape={graph_shape}")
         self.frame_id = None
 
         super(MyGraph, self).__init__(graph_shape, (0, video_height - 1), (video_width - 1, 0), *args, **kwargs)
@@ -139,7 +144,7 @@ def extract_parameters_from_video(video: Video, filepath: Union[Path, str]):
         [
             sg.Column(
                 [
-                    [sg.Text("1. Encierre en un rectángulo la posición del marcador de 10mm.", k=K.SelectInstructions)],
+                    [sg.Text("1. Encierre en un rectángulo la posición del marcador de 10mm.", k=K.SelectInstructions, size=(55, 3))],
                     [
                         sg.pin(sg.B("Retroceder", visible=False, k=K.BackButton)),
                         sg.pin(sg.B("Mostrar parámetros", visible=False, k=K.ShowDetailsButton)),
@@ -148,7 +153,7 @@ def extract_parameters_from_video(video: Video, filepath: Union[Path, str]):
                     ],
                     [details_list]
                 ],
-                vertical_alignment='top', expand_y=True, expand_x=True
+                vertical_alignment='top', expand_y=True
             ),
             sg.Column(
                 [[MyGraph(imshape, k=K.Graph, enable_events=True, drag_submits=True)],
@@ -162,7 +167,8 @@ def extract_parameters_from_video(video: Video, filepath: Union[Path, str]):
         [sg.Button('Go', visible=False), sg.Button('Nothing', visible=False), sg.Button('Exit', visible=False)]
     ]
 
-    window = sg.Window(f"AntTracker - {filepath}", layout, icon=C.LOGO_AT_ICO, modal=True, finalize=True)
+    window = sg.Window(f"AntTracker - {filepath}", layout, icon=C.LOGO_AT_ICO, modal=True, finalize=True,
+                        size=(1300, 800), resizable=True, location=(50, 50))
     window[K.SelectInstructions].expand(expand_y=True, expand_x=True)
     g: MyGraph = window[K.Graph]  # noqa
 
@@ -314,7 +320,7 @@ def extract_parameters_from_video(video: Video, filepath: Union[Path, str]):
                 g.delete_figure(selection_id)
             dragging = False
         elif event == K.BackButton:
-            window[K.ParameterDetails].Visible = False
+            window[K.ParameterDetails].update(visible=False)
             previewing_segmentation = False
             current_step = current_step.back()
             if current_step in rect_ids:
@@ -322,7 +328,7 @@ def extract_parameters_from_video(video: Video, filepath: Union[Path, str]):
                 rect_ids[current_step] = []
                 rect_data[current_step] = None
         elif event == K.ShowDetailsButton:
-            window[K.ParameterDetails].Visible = not window[K.ParameterDetails].Visible
+            window[K.ParameterDetails].update(visible=not window[K.ParameterDetails].visible)
         elif event == K.PreviewButton:
             previewing_segmentation = not previewing_segmentation
             update_current_frame(int(values[K.FrameSlider]))
@@ -379,7 +385,7 @@ def extract_parameters_from_video(video: Video, filepath: Union[Path, str]):
         window[K.ShowDetailsButton].update(visible=current_step == SelectionStep.Done)
         window[K.PreviewButton].update(visible=current_step == SelectionStep.Done)
         window[K.ContinueButton].update(visible=current_step == SelectionStep.Done)
-        window[K.ParameterDetails].update(visible=window[K.ParameterDetails].Visible)
+        window[K.ParameterDetails].update(visible=window[K.ParameterDetails].visible)
 
 def extract_pixel_size(marker: Rect):
     diameter_px = (marker.height + marker.width) / 2

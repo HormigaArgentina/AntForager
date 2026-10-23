@@ -277,7 +277,13 @@ def results_overview(sesspath: Path, with_leaves=True):
             open_labeler(trkfile)
         elif event == K.OpenExport:
             with LoadingWindow():
-                os.startfile(exportpath)
+                import sys, subprocess
+                if sys.platform == "darwin":
+                    subprocess.run(["open", str(exportpath)])
+                elif sys.platform.startswith("linux"):
+                    subprocess.run(["xdg-open", str(exportpath)])
+                else:
+                    os.startfile(exportpath)
                 window[K.OpenExport].update("Abriendo...", disabled=True)
 
                 def wait_n_update():

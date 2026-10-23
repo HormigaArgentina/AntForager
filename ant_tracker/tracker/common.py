@@ -250,7 +250,23 @@ def draw_text(image: Image_T, text: Any, pos: Position, size=20, color: Color = 
     """"Returns a copy of `image` with `text` drawn on `pos`, with optional `size`"""
     from PIL import Image, ImageDraw, ImageFont
     text = str(text)
-    font = ImageFont.truetype("arial.ttf", size=size)
+    try:
+        font = ImageFont.truetype("arial.ttf", size=size)
+    except OSError:
+        mac_candidates = [
+            "/Library/Fonts/Arial.ttf",
+            "/System/Library/Fonts/Supplemental/Arial.ttf",
+            "/System/Library/Fonts/Helvetica.ttc",
+        ]
+        font = None
+        for candidate in mac_candidates:
+            try:
+                font = ImageFont.truetype(candidate, size=size)
+                break
+            except OSError:
+                continue
+        if font is None:
+            font = ImageFont.load_default()
     pilimage = Image.fromarray(image)
     draw = ImageDraw.ImageDraw(pilimage)
     draw.text((pos.x - size // 2, pos.y - size // 2), text, font=font, fill=color)

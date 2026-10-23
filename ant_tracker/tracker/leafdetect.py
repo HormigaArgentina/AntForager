@@ -68,11 +68,10 @@ class LeafDetector(ABC):
                 continue
             slices.append(slice_with_ant)
         if len(slices) == 0: return None
-        slices = np.array(slices)
-        images = []
         indexes = np.round(np.linspace(0, len(slices) - 1, self.n_frames)).astype(int)
-        for s in slices[indexes]:
-            images.append(resize(s, (64, 64), preserve_range=True))
+        images = []
+        for i in indexes:
+            images.append(resize(slices[i], (64, 64), preserve_range=True))
         images = np.stack(images, axis=0) / 255.0
         images = np.expand_dims(images, axis=0)
         return images
@@ -91,8 +90,13 @@ class TFLeafDetector(LeafDetector):
 # noinspection PyUnresolvedReferences
 class TFLiteLeafDetector(LeafDetector):
     def __init__(self, tfl_model: Union[Path, str], video: Video, extra_pixels=15, img_size=64, n_frames=75):
-        import tflite_runtime.interpreter as tflite
-        self.interpreter = tflite.Interpreter(tfl_model)
+        try:
+            import tflite_runtime.interpreter as tflite
+            Interpreter = tflite.Interpreter
+        except ImportError:
+            import tensorflow as tf
+            Interpreter = tf.lite.Interpreter
+        self.interpreter = Interpreter(tfl_model)
         self.interpreter.allocate_tensors()
         self.in_index = self.interpreter.get_input_details()[0]['index']
         self.out_index = self.interpreter.get_output_details()[0]['index']
