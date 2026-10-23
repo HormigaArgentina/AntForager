@@ -28,6 +28,8 @@ class Project:
     profile_id: str = "anttracker_legacy"
     videos_dir: str = ""
     mm_per_px: Optional[float] = None
+    timezone: str = "America/Argentina/Buenos_Aires"   # hora local de los videos
+    twilight_deg: float = -18.0                          # fin del crepúsculo (-6 civil, -12 náutico, -18 astronómico)
     notes: str = ""
 
     FILE = "proyecto.json"

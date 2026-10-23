@@ -1,9 +1,25 @@
 from PySide6.QtWidgets import (QFileDialog, QHBoxLayout, QLabel, QPushButton, QTableWidget,
                                QTableWidgetItem, QVBoxLayout, QWidget, QAbstractItemView)
 
-from ..project import list_video_files, probe_video
+from datetime import timedelta
 
-COLS = ["Archivo", "Inicio (según nombre)", "Resolución", "fps", "Duración (min)"]
+from ..project import list_video_files, probe_video
+from ..photoperiod import light_phase
+
+
+def luz_texto(project, v):
+    """Fase de luz al inicio y al final del video, o '—' si falta la ubicación o la hora."""
+    if project is None or project.lat is None or project.lon is None or v.start is None:
+        return "—"
+    try:
+        a = light_phase(v.start, project.lat, project.lon, project.timezone, project.twilight_deg)
+        b = light_phase(v.start + timedelta(seconds=v.duration_s), project.lat, project.lon,
+                        project.timezone, project.twilight_deg)
+    except Exception:
+        return "—"
+    return a if a == b else f"{a} → {b}"
+
+COLS = ["Archivo", "Inicio (según nombre)", "Resolución", "fps", "Duración (min)", "Luz (inicio → fin)"]
 
 
 class VideosPage(QWidget):
@@ -59,7 +75,8 @@ class VideosPage(QWidget):
             r = self.table.rowCount()
             self.table.insertRow(r)
             vals = [str(f.relative_to(folder)), v.start.strftime("%Y-%m-%d %H:%M:%S") if v.start else "?",
-                    f"{v.width}x{v.height}", f"{v.fps:.1f}", f"{v.duration_s / 60:.1f}"]
+                    f"{v.width}x{v.height}", f"{v.fps:.1f}", f"{v.duration_s / 60:.1f}",
+                    luz_texto(self.win.project, v)]
             for c, t in enumerate(vals):
                 self.table.setItem(r, c, QTableWidgetItem(t))
         self.win.statusBar().showMessage(f"{len(files)} videos.", 4000)

@@ -35,6 +35,10 @@ class ProjectPage(QWidget):
             sb.setRange(lo, hi)
             sb.setDecimals(6)
         self.profile = QComboBox()
+        self.tz = QLineEdit()
+        self.twi = QComboBox()
+        for deg, txt in ((-6.0, "Civil (-6°)"), (-12.0, "Náutico (-12°)"), (-18.0, "Astronómico (-18°), noche completa")):
+            self.twi.addItem(txt, deg)
         self.mm = QDoubleSpinBox()
         self.mm.setDecimals(5)
         self.mm.setRange(0, 100)
@@ -49,6 +53,8 @@ class ProjectPage(QWidget):
         b_map = QPushButton("Ubicar en el mapa / buscar lugar...")
         b_map.clicked.connect(self.pick_on_map)
         form.addRow("", b_map)
+        form.addRow("Zona horaria de los videos", self.tz)
+        form.addRow("El crepúsculo termina con el sol en", self.twi)
         form.addRow("Perfil de modelo", self.profile)
         form.addRow("Escala (mm por píxel)", self.mm)
         form.addRow("Notas", self.notes)
@@ -71,6 +77,8 @@ class ProjectPage(QWidget):
         self.lat.setValue(p.lat or 0.0)
         self.lon.setValue(p.lon or 0.0)
         self.mm.setValue(p.mm_per_px or 0.0)
+        self.tz.setText(p.timezone)
+        self.twi.setCurrentIndex(max(self.twi.findData(p.twilight_deg), 0))
         self.notes.setPlainText(p.notes)
         self.profile.clear()
         try:
@@ -98,6 +106,16 @@ class ProjectPage(QWidget):
         p.lat = self.lat.value() or None
         p.lon = self.lon.value() or None
         p.mm_per_px = self.mm.value() or None
+        tz = self.tz.text().strip() or p.timezone
+        try:
+            from zoneinfo import ZoneInfo
+            ZoneInfo(tz)
+        except Exception:
+            from PySide6.QtWidgets import QMessageBox
+            QMessageBox.warning(self, "AntForager", f"Zona horaria desconocida: {tz}\nEjemplo: America/Argentina/Buenos_Aires")
+            return
+        p.timezone = tz
+        p.twilight_deg = self.twi.currentData()
         p.notes = self.notes.toPlainText()
         if self.profile.currentData():
             p.profile_id = self.profile.currentData()
