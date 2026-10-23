@@ -1,0 +1,8 @@
+{
+  "id": "anttracker_legacy",
+  "name": "AntTracker original (clasificador TFLite 2020)",
+  "species": "Acromyrmex lobicornis (dataset original)",
+  "kind": "tflite_legacy",
+  "weights": "../../ant_tracker/tracker_gui/model.tflite",
+  "notes": "Perfil por defecto para mantener compatibilidad. Mostró sesgo hacia 'cargada' en videos nuevos."
+}

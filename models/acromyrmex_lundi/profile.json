@@ -1,0 +1,16 @@
+{
+  "id": "acromyrmex_lundi",
+  "name": "Acromyrmex lundi - carga (YOLOv8n-seg)",
+  "species": "Acromyrmex lundi",
+  "kind": "yolo_seg",
+  "weights": "weights.pt",
+  "load_classes": ["leaf"],
+  "conf": 0.5,
+  "imgsz": 640,
+  "mode": "frame",
+  "n_frames": 12,
+  "decision": 0.4,
+  "author": "J. Sabattini",
+  "trained_on": "Roboflow proyecto-hormiga/acromyrmex_lundi (7954 imágenes). Clase 'leaf' = cualquier carga (hojas, palos, frutos).",
+  "notes": "Umbral conf y decision pendientes de calibrar con hormigas verificadas."
+}

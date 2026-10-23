@@ -14,6 +14,7 @@ from .session import SessionInfo
 from ..tracker.common import Rect, crop_from_rect
 from ..tracker.info import TracksCompleteInfo, Direction
 from ..tracker.leafdetect import TFLiteLeafDetector
+from ..detection import create_detector
 from ..tracker.segmenter import LogWSegmenter
 from ..tracker.track import Track
 from ..tracker.tracking import Tracker
@@ -165,7 +166,7 @@ class TrackTask:
                     detected_ids = session.detection_probs[path].keys()
                     to_detect = set(track_ids_still_undetected) - detected_ids
                     send(progress_key, {'p': len(tracks) - len(to_detect), 'max': len(tracks) + 1})
-                    detector = TFLiteLeafDetector(C.TFLITE_MODEL, video)
+                    detector = create_detector(video)  # perfil activo (ver ant_tracker/detection)
                     send(K.Report, f"{short_fn(path)}, retomando detección de hojas... ")
                     for i_trk, track in enumerate(tracks):
                         if track.id in to_detect:
