@@ -2,6 +2,7 @@ from PySide6.QtWidgets import (QHBoxLayout, QComboBox, QDoubleSpinBox, QFormLayo
                                QWidget, QVBoxLayout, QPlainTextEdit)
 
 from ..project import Project
+from .map_dialog import MapDialog
 
 
 class ProjectPage(QWidget):
@@ -45,6 +46,9 @@ class ProjectPage(QWidget):
         form.addRow("Especie", self.species)
         form.addRow("Latitud del nido (°)", self.lat)
         form.addRow("Longitud del nido (°)", self.lon)
+        b_map = QPushButton("Ubicar en el mapa / buscar lugar...")
+        b_map.clicked.connect(self.pick_on_map)
+        form.addRow("", b_map)
         form.addRow("Perfil de modelo", self.profile)
         form.addRow("Escala (mm por píxel)", self.mm)
         form.addRow("Notas", self.notes)
@@ -79,6 +83,12 @@ class ProjectPage(QWidget):
         i = self.profile.findData(p.profile_id)
         if i >= 0:
             self.profile.setCurrentIndex(i)
+
+    def pick_on_map(self):
+        dlg = MapDialog(self, self.lat.value() or None, self.lon.value() or None)
+        if dlg.exec() and dlg.result_coords:
+            self.lat.setValue(dlg.result_coords[0])
+            self.lon.setValue(dlg.result_coords[1])
 
     def save(self):
         p = self.win.project
